@@ -17,9 +17,13 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import TxStatus, { type TxStage } from "@/components/ui/TxStatus";
 import { useToast } from "@/components/ui/Toast";
-import { isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain, isBotChainId } from "@/lib/botchain/chain";
 import { getDeployment, ZERO_ADDRESS } from "@/lib/botchain/deployment";
 import { lastcallAbi } from "@/lib/botchain/abi";
+
+// The chain's own symbol. Hardcoding "BOT" labelled every testnet amount as mainnet
+// currency, which is the confusion the network badge exists to prevent.
+const SYMBOL = activeBotChain.nativeCurrency.symbol;
 
 export default function ArmForm() {
   return (
@@ -227,7 +231,7 @@ function ArmFormInner() {
           disabled={!beneficiaryValid || !intervalValid || !amountValid || stage === "signing" || stage === "pending"}
           className="w-full"
         >
-          {stage === "signing" ? "Confirming in Wallet..." : stage === "pending" ? "Arming Switch..." : `Arm Switch with ${amount || "0"} BOT`}
+          {stage === "signing" ? "Confirming in Wallet..." : stage === "pending" ? "Arming Switch..." : `Arm Switch with ${amount || "0"} ${SYMBOL}`}
         </Button>
       </div>
     </Panel>

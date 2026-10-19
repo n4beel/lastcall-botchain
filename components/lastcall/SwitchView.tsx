@@ -21,15 +21,18 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import TxStatus, { type TxStage } from "@/components/ui/TxStatus";
 import { useToast } from "@/components/ui/Toast";
-import { isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain, isBotChainId } from "@/lib/botchain/chain";
 import { getDeployment, ZERO_ADDRESS } from "@/lib/botchain/deployment";
 import { lastcallAbi } from "@/lib/botchain/abi";
 import {
   formatDuration,
-  isClaimable,
   secondsUntilClaimable,
   type LastcallSwitch,
 } from "@/lib/lastcall";
+
+// The chain's own symbol. Hardcoding "BOT" labelled every testnet amount as mainnet
+// currency, which is the confusion the network badge exists to prevent.
+const SYMBOL = activeBotChain.nativeCurrency.symbol;
 
 interface SwitchViewProps {
   id: bigint;
@@ -61,8 +64,18 @@ export default function SwitchView({ id }: SwitchViewProps) {
     abi: lastcallAbi,
     functionName: "timeUntilClaimable",
     args: [id],
-    query: { enabled: Boolean(deployment) },
+    // Polled, because this is the value the Claim button is gated on and it goes stale by simply
+    // sitting there. It is also the contract's own clock rather than the browser's, so a switch
+    // never offers a claim that `claim()` would reject with NotYetClaimable.
+    query: { enabled: Boolean(deployment), refetchInterval: 5_000 },
   });
+
+  // A local tick so the countdown moves between polls. Display only — the gate above decides.
+  const [nowSec, setNowSec] = useState(() => Math.floor(Date.now() / 1000));
+  useEffect(() => {
+    const t = setInterval(() => setNowSec(Math.floor(Date.now() / 1000)), 1_000);
+    return () => clearInterval(t);
+  }, []);
 
   const [actionType, setActionType] = useState<"checkIn" | "withdraw" | "claim">("checkIn");
   const [stage, setStage] = useState<TxStage>("idle");
@@ -131,9 +144,10 @@ export default function SwitchView({ id }: SwitchViewProps) {
   const isOwner = address?.toLowerCase() === s.owner.toLowerCase();
   const isBeneficiary = address?.toLowerCase() === s.beneficiary.toLowerCase();
 
-  const nowSec = Math.floor(Date.now() / 1000);
-  const remainingSec = timeRemainingData !== undefined ? Number(timeRemainingData) : secondsUntilClaimable(s, nowSec);
-  const claimable = isClaimable(s, nowSec) || (remainingSec === 0 && !s.closed);
+  // Prefer the chain's answer; fall back to the local one only until the first read lands.
+  const remainingSec =
+    timeRemainingData !== undefined ? Number(timeRemainingData) : secondsUntilClaimable(s, nowSec);
+  const claimable = !s.closed && remainingSec === 0;
 
   const handleAction = async (type: "checkIn" | "withdraw" | "claim") => {
     if (!deployment || s.closed) return;
@@ -190,7 +204,7 @@ export default function SwitchView({ id }: SwitchViewProps) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs border-t border-b border-zinc-800 py-3">
             <div>
               <span className="text-zinc-500 block">Deposit</span>
-              <span className="text-sm font-semibold text-white">{formatEther(s.amount)} BOT</span>
+              <span className="text-sm font-semibold text-white">{formatEther(s.amount)} {SYMBOL}</span>
             </div>
             <div>
               <span className="text-zinc-500 block">Check-in Window</span>

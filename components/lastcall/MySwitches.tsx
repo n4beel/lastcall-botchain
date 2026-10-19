@@ -7,10 +7,14 @@ import { useAccount, useChainId, usePublicClient, useReadContracts } from "wagmi
 import Panel from "@/components/ui/Panel";
 import Spinner from "@/components/ui/Spinner";
 import Badge from "@/components/ui/Badge";
-import { isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain, isBotChainId } from "@/lib/botchain/chain";
 import { getDeployment, isDeployed } from "@/lib/botchain/deployment";
 import { lastcallAbi } from "@/lib/botchain/abi";
 import { formatDuration, isClaimable, secondsUntilClaimable, type LastcallSwitch } from "@/lib/lastcall";
+
+// The chain's own symbol. Hardcoding "BOT" labelled every testnet amount as mainnet
+// currency, which is the confusion the network badge exists to prevent.
+const SYMBOL = activeBotChain.nativeCurrency.symbol;
 
 /**
  * Every switch the connected wallet owns or stands to inherit.
@@ -178,7 +182,7 @@ export default function MySwitches() {
                 </Link>
 
                 <span className="font-mono text-xs text-zinc-300">
-                  {s ? `${formatEther(s.amount)} BOT` : "…"}
+                  {s ? `${formatEther(s.amount)} ${SYMBOL}` : "…"}
                 </span>
 
                 <span className="text-[11px] uppercase tracking-wide text-zinc-500">{role}</span>
