@@ -6,6 +6,7 @@ import PageShell from "@/components/layout/PageShell";
 import Panel from "@/components/ui/Panel";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import MySwitches from "@/components/lastcall/MySwitches";
 import { NAV } from "@/lib/nav";
 
 export default function SwitchesPage() {
@@ -18,6 +19,9 @@ export default function SwitchesPage() {
       description="Inspect or manage an existing dead man's switch."
     >
       <div className="space-y-6">
+        {/* Yours first. A beneficiary is never told their switch ID by anyone. */}
+        <MySwitches />
+
         <Panel>
           <div className="space-y-4 max-w-md">
             <h2 className="text-base font-semibold text-white">Find a Switch</h2>

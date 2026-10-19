@@ -16,6 +16,10 @@
  * grotesk, and banded sections that change colour with state.
  */
 :root {
+  /* Native controls follow this: without it the browser paints the date picker's
+     calendar glyph for a light page, which on a dark one is simply invisible, and the
+     picker popup comes up in the wrong palette. Scrollbars and selects follow too. */
+  color-scheme: dark;
   --bg-base: #141110;
   --bg-surface: #1C1816;
   --bg-elevated: #241F1C;
