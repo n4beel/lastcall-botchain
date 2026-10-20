@@ -20,6 +20,8 @@ import { useToast } from "@/components/ui/Toast";
 import { activeBotChain, isBotChainId } from "@/lib/botchain/chain";
 import { getDeployment, ZERO_ADDRESS } from "@/lib/botchain/deployment";
 import { lastcallAbi } from "@/lib/botchain/abi";
+import { MIN_INTERVAL } from "@/lib/lastcall";
+
 
 // The chain's own symbol. Hardcoding "BOT" labelled every testnet amount as mainnet
 // currency, which is the confusion the network badge exists to prevent.
@@ -93,7 +95,11 @@ function ArmFormInner() {
     trimmedBeneficiary.toLowerCase() !== address?.toLowerCase();
 
   const hoursNum = parseFloat(intervalHours);
-  const intervalValid = !isNaN(hoursNum) && hoursNum >= 1;
+  // Checked on the seconds that are sent, not the hours that were typed — the contract's bound is
+  // MIN_INTERVAL = 1 hours expressed in seconds, and flooring sits between the two.
+  const intervalSecondsNum = Number.isFinite(hoursNum) ? Math.floor(hoursNum * 3600) : NaN;
+  const intervalValid =
+    Number.isFinite(intervalSecondsNum) && intervalSecondsNum >= MIN_INTERVAL;
 
   const amountNum = parseFloat(amount);
   const amountValid = !isNaN(amountNum) && amountNum > 0;
@@ -101,7 +107,7 @@ function ArmFormInner() {
   const handleArm = useCallback(async () => {
     if (!beneficiaryValid || !intervalValid || !amountValid || !deployment || !isBotChainId(chainId)) return;
 
-    const intervalSeconds = BigInt(Math.floor(hoursNum * 3600));
+    const intervalSeconds = BigInt(intervalSecondsNum);
     const valueWei = parseEther(amount.trim());
 
     setStage("signing");
@@ -127,7 +133,7 @@ function ArmFormInner() {
       }
       toast("error", "Submission cancelled", err instanceof Error ? err.message : "Reverted");
     }
-  }, [beneficiaryValid, intervalValid, amountValid, deployment, chainId, hoursNum, amount, trimmedBeneficiary, writeContractAsync, toast]);
+  }, [beneficiaryValid, intervalValid, amountValid, deployment, chainId, intervalSecondsNum, amount, trimmedBeneficiary, writeContractAsync, toast]);
 
   if (stage === "confirmed") {
     return (

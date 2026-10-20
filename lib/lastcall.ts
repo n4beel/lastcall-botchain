@@ -32,3 +32,10 @@ export function formatDuration(seconds: number): string {
   if (h > 0) return `${h}h ${m}m`;
   return `${Math.max(1, m)}m`;
 }
+
+/**
+ * Lastcall.sol declares `MIN_INTERVAL = 1 hours`. Here in the unit the contract is actually
+ * given, because the arm form validates seconds and the two must not drift — see
+ * lib/__tests__/contract-limits.
+ */
+export const MIN_INTERVAL = 3600;
