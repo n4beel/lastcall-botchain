@@ -2,6 +2,25 @@
 
 A dead man's switch. Check in or your funds transfer.
 
+### BOT Chain mainnet (677) — live
+
+| | |
+|---|---|
+| Contract | [`0xe7b5d33BEDdf88f8f4Df64F0bdF04284b3A97A6c`](https://scan.botchain.ai/address/0xe7b5d33BEDdf88f8f4Df64F0bdF04284b3A97A6c) · source verified |
+| Deploy block | 27329399 |
+
+### Bohr testnet (968) — live
+
+| | |
+|---|---|
+| Contract | [`0x257E01Ccebb47d9973A54785D9177d35637a1A95`](https://scan.bohr.life/address/0x257E01Ccebb47d9973A54785D9177d35637a1A95) · source verified |
+| Deploy block | 27397110 |
+
+The two addresses differ because the deployer's nonce diverged between the chains;
+each is this contract on its own network. The site targets mainnet.
+
+---
+
 ## **WHOEVER ACTS FIRST WINS**
 
 The owner can withdraw at any time — even after the interval has lapsed, as long as the beneficiary has not claimed yet. This is intentional. The switch exists to ensure a voluntary transfer occurs if the owner becomes unreachable, not to force an irreversible handover prematurely.
